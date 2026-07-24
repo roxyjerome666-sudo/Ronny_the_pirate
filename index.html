@@ -3,251 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RONNY_THE_PIRATE // LIVE_BREACH_STREAM</title>
+    <title>TERMINAL // Ronny_the_pirate</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Share Tech Mono', monospace;
         }
 
         body {
-            background-color: #020802;
-            color: #00ff41;
-            min-height: 100vh;
+            background-color: #050505;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            overflow-x: hidden;
-            text-shadow: 0 0 5px #00ff41;
         }
 
-        /* CRT Scanlines */
-        body::before {
-            content: " ";
-            display: block;
-            position: fixed;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
-            z-index: 100;
-            background-size: 100% 3px, 6px 100%;
-            pointer-events: none;
-        }
-
-        .terminal {
+        /* Matrix Canvas */
+        #matrixCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 900px;
-            background: rgba(1, 10, 1, 0.95);
-            border: 1px solid #00ff41;
-            box-shadow: 0 0 25px rgba(0, 255, 65, 0.25);
-            border-radius: 6px;
-            padding: 20px;
-            position: relative;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.15;
         }
 
-        .header {
+        /* Interface Wrapper */
+        .interface {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-rows: 50px 1fr 180px;
+            height: 100%;
+            padding: 15px;
+            gap: 10px;
+        }
+
+        /* Header */
+        header {
+            border: 1px solid #00ff66;
+            background: rgba(0, 20, 0, 0.8);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #00ff41;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
+            padding: 0 20px;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
         }
 
         .title {
-            font-size: 1.1rem;
             font-weight: bold;
+            font-size: 16px;
             letter-spacing: 2px;
         }
 
-        .status {
-            font-size: 0.8rem;
-            background: #00ff41;
-            color: #000;
-            padding: 3px 8px;
-            font-weight: bold;
-            letter-spacing: 1px;
+        .status-badge {
+            background: #003311;
+            padding: 4px 10px;
+            border: 1px solid #00ff66;
+            font-size: 12px;
+            animation: pulse 1.5s infinite;
         }
 
-        .console-output {
-            height: 480px;
+        /* Main Terminal Area */
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .terminal-box {
+            border: 1px solid #00ff66;
+            background: rgba(0, 10, 0, 0.85);
+            padding: 15px;
             overflow-y: auto;
-            font-size: 0.92rem;
+            font-size: 13px;
             line-height: 1.5;
-            text-align: left;
-            padding-right: 10px;
+            box-shadow: inset 0 0 15px rgba(0, 255, 102, 0.1);
         }
 
-        .console-output::-webkit-scrollbar {
-            width: 6px;
+        .side-panel {
+            border: 1px solid #00ff66;
+            background: rgba(0, 10, 0, 0.85);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .console-output::-webkit-scrollbar-thumb {
-            background: #00ff41;
+        .panel-block {
+            border: 1px dashed #008833;
+            padding: 10px;
+            font-size: 11px;
         }
 
-        .line {
-            margin-bottom: 4px;
-            word-wrap: break-word;
+        .panel-block h4 {
+            margin-bottom: 8px;
+            color: #66ff99;
+            border-bottom: 1px solid #008833;
+            padding-bottom: 3px;
         }
 
-        .line.info {
-            color: #00e1ff;
-            text-shadow: 0 0 5px #00e1ff;
+        /* Footer & Progress */
+        footer {
+            border: 1px solid #00ff66;
+            background: rgba(0, 20, 0, 0.8);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .line.warn {
-            color: #ffcc00;
-            text-shadow: 0 0 5px #ffcc00;
-        }
-
-        .line.danger {
-            color: #ff0055;
-            text-shadow: 0 0 5px #ff0055;
-        }
-
-        .progress-bar {
+        .progress-bar-container {
             width: 100%;
-            background: #031403;
-            border: 1px solid #00ff41;
-            height: 18px;
-            margin-top: 15px;
+            height: 20px;
+            border: 1px solid #00ff66;
+            background: #001100;
             position: relative;
         }
 
-        .progress-fill {
-            width: 0%;
+        .progress-bar {
             height: 100%;
-            background: #00ff41;
-            box-shadow: 0 0 12px #00ff41;
-            transition: width 0.2s linear;
+            width: 0%;
+            background: #00ff66;
+            box-shadow: 0 0 10px #00ff66;
+            transition: width 0.2s ease;
         }
 
-        .blinking-cursor {
-            display: inline-block;
-            width: 8px;
-            height: 15px;
-            background: #00ff41;
-            animation: blink 0.8s infinite;
-            vertical-align: middle;
-            margin-left: 5px;
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #000;
+            font-weight: bold;
+            font-size: 12px;
+            mix-blend-mode: difference;
         }
 
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
+        /* Text Utilities */
+        .warn { color: #ffaa00; }
+        .danger { color: #ff3333; font-weight: bold; }
+        .info { color: #00ccff; }
+        .success { color: #00ff66; font-weight: bold; }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
         }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #001100; }
+        ::-webkit-scrollbar-thumb { background: #00ff66; }
     </style>
 </head>
 <body>
 
-    <div class="terminal">
-        <div class="header">
-            <div class="title">> OPERATOR: Ronny_the_pirate</div>
-            <div class="status" id="status-tag">INITIALIZING...</div>
+    <canvas id="matrixCanvas"></canvas>
+
+    <div class="interface">
+        <header>
+            <div class="title">OPERATOR: Ronny_the_pirate // REMOTE EXPLOIT SUITE v4.2</div>
+            <div class="status-badge" id="statusBadge">INITIALIZING...</div>
+        </header>
+
+        <div class="main-content">
+            <div class="terminal-box" id="terminal"></div>
+
+            <div class="side-panel">
+                <div class="panel-block">
+                    <h4>TARGET METRICS</h4>
+                    <div>DEVICE: Android/ARM64</div>
+                    <div>IP: 192.168.1.104</div>
+                    <div>PORT: 5555 (ADB)</div>
+                    <div>STAGE: <span id="stageText">RECON</span></div>
+                </div>
+
+                <div class="panel-block">
+                    <h4>ACTIVE SUBSYSTEMS</h4>
+                    <div>[✓] WireGuard Tunnel</div>
+                    <div>[✓] Frida Injector</div>
+                    <div>[✓] Metasploit Stager</div>
+                    <div>[ ] SELinux Bypass</div>
+                </div>
+            </div>
         </div>
 
-        <div class="console-output" id="console"></div>
-
-        <div class="progress-bar">
-            <div class="progress-fill" id="progress"></div>
-        </div>
+        <footer>
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                <span>OVERALL INFILTRATION PROGRESS</span>
+                <span id="timerText">00:00 / 00:30</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-text" id="progressPercent">0%</div>
+            </div>
+        </footer>
     </div>
 
     <script>
-        const logs = [
-            { text: "[*] Booting Ronny_the_pirate Cyber-Suite v9.4...", type: "info", delay: 800 },
-            { text: "[*] Initializing encrypted Tor SOCKS5 multi-hop routing...", delay: 600 },
-            { text: "[*] Node 1: Zurich, CH | Node 2: Reykjavik, IS | Node 3: Tokyo, JP", delay: 700 },
-            { text: "[+] IP Address masked successfully -> [185.220.101.42]", type: "info", delay: 600 },
-            { text: "[*] Scanning local network segment for vulnerable target devices...", delay: 1000 },
-            { text: "[*] Broadcasting ICMP Echo packets across subnet /24...", delay: 800 },
-            { text: "[+] Target Handset Detected: ARM64 Architecture (Mobile Node)", type: "warn", delay: 900 },
-            { text: "[*] Querying MAC address vendor database [OUI Lookup: Apple/Qualcomm]...", delay: 700 },
-            { text: "[*] Launching Nmap Port Scanner [SYN Stealth Scan]...", delay: 1100 },
-            { text: "    -> Port 22/TCP  [SSH]......... CLOSED", delay: 400 },
-            { text: "    -> Port 80/TCP  [HTTP]........ OPEN", delay: 400 },
-            { text: "    -> Port 443/TCP [HTTPS]....... OPEN", delay: 400 },
-            { text: "    -> Port 5555/TCP [ADB Remote].. OPEN", type: "warn", delay: 600 },
-            { text: "[!] EXPLOIT VECTOR FOUND: Open ADB/WebKit Debug Bridge on port 5555!", type: "danger", delay: 1000 },
-            { text: "[*] Loading Metasploit Framework 2026 Zero-Day Module Repository...", delay: 900 },
-            { text: "[*] Executing Exploit Payload: exploit/multi/android/adb_remote_rce", delay: 1200 },
-            { text: "[*] Sending raw heap-spray buffer overflow sequence (0x7fff5fbff000)...", delay: 1000 },
-            { text: "[+] RCE PAYLOAD DELIVERED! Bypassing ASLR & DEP protection...", type: "warn", delay: 1100 },
-            { text: "[*] Spawning Meterpreter Stager Shell inside process target...", delay: 800 },
-            { text: "[*] Meterpreter session 1 opened (127.0.0.1:4444 -> target:5555)", type: "info", delay: 1000 },
-            { text: "[*] Analyzing kernel permissions... [Linux Kernel 5.15 / iOS Darwin XNU]", delay: 900 },
-            { text: "[*] Escalating privileges via CVE-2026-SELinux-Bypass (Local Root Exploit)...", delay: 1300 },
-            { text: "[+] ROOT ACCESS CONFIRMED! UID: 0 (root) GID: 0 (root)", type: "danger", delay: 1000 },
-            { text: "[*] Injecting stealth rootkit daemon into /system/xbin/ronny_stealthd...", delay: 1100 },
-            { text: "[*] Hooking System Cryptography Engine via Frida Dynamic Instrumentation...", delay: 1200 },
-            { text: "[*] Dumping SQLite databases from local application sandbox...", delay: 900 },
-            { text: "    [1/4] Extracting WhatsApp enc.db master key............ [SUCCESS]", type: "info", delay: 800 },
-            { text: "    [2/4] Extracting Telegram Session Key & Contacts....... [SUCCESS]", type: "info", delay: 800 },
-            { text: "    [3/4] Extracting Saved Browser Credentials & Cookies... [SUCCESS]", type: "info", delay: 800 },
-            { text: "    [4/4] Intercepting SMS 2FA Gateway Stream.............. [ACTIVE]", type: "warn", delay: 800 },
-            { text: "[*] Bypassing Device KeyStore / Secure Enclave hardware vault...", delay: 1300 },
-            { text: "[!] HIJACKING SENSORS: Activating Microphone & Camera Feed in background...", type: "danger", delay: 1500 },
-            { text: "[*] Exfiltrating DCIM Photo Gallery and Cloud Sync Cache...", delay: 1100 },
-            { text: "    -> 1,420 Media files queued for silent background exfiltration...", delay: 900 },
-            { text: "[*] Establishing persistent Reverse TCP Shell on boot event...", delay: 1000 },
-            { text: "[*] Clearing system event logs (auditd / logcat / syslog)...", delay: 900 },
-            { text: "[*] Masking process name as [kworker/u16:2-events_unbound]...", delay: 800 },
-            { text: "[========================================================]", delay: 600 },
-            { text: "[>>>] FULL SYSTEM CONTROL ESTABLISHED BY Ronny_the_pirate [<<<]", type: "danger", delay: 1000 },
-            { text: "[!] Target Device completely compromised. Session locked in.", type: "danger", delay: 600 }
-        ];
+        // Matrix Background Effect
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-        function startHackingAuto() {
-            const consoleBox = document.getElementById('console');
-            const progressBar = document.getElementById('progress');
-            const statusTag = document.getElementById('status-tag');
+        const chars = '0123456789ABCDEFHKLMNPRTUVWXY';
+        const fontSize = 14;
+        const columns = Math.floor(canvas.width / fontSize);
+        const drops = Array(columns).fill(1);
 
-            statusTag.innerText = "HACKING IN PROGRESS...";
-            statusTag.style.background = "#ffcc00";
-            statusTag.style.color = "#000";
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(5, 5, 5, 0.08)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff66';
+            ctx.font = fontSize + 'px monospace';
 
-            let currentStep = 0;
-
-            function printNextLine() {
-                if (currentStep < logs.length) {
-                    const item = logs[currentStep];
-                    const p = document.createElement('div');
-                    p.className = 'line ' + (item.type || '');
-                    p.innerText = item.text;
-                    consoleBox.appendChild(p);
-                    consoleBox.scrollTop = consoleBox.scrollHeight;
-
-                    // Progress Bar
-                    const percentage = Math.round(((currentStep + 1) / logs.length) * 100);
-                    progressBar.style.width = percentage + '%';
-
-                    currentStep++;
-                    setTimeout(printNextLine, item.delay);
-                } else {
-                    statusTag.innerText = "DEVICE COMPROMISED";
-                    statusTag.style.background = "#ff0055";
-                    statusTag.style.color = "#fff";
-
-                    const finalLine = document.createElement('div');
-                    finalLine.className = 'line danger';
-                    finalLine.style.marginTop = "10px";
-                    finalLine.innerHTML = 'Ronny_the_pirate@root:~# <span class="blinking-cursor"></span>';
-                    consoleBox.appendChild(finalLine);
-                    consoleBox.scrollTop = consoleBox.scrollHeight;
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
                 }
+                drops[i]++;
             }
+        }
+        setInterval(drawMatrix, 33);
 
-            printNextLine();
+        // Web Audio Synthesizer (for typing effect sounds)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBeep(freq = 800, duration = 0.03) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.frequency.value = freq;
+                osc.type = 'square';
+                gain.gain.value = 0.015;
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
         }
 
-        // Start automatically as soon as page loads
-        window.onload = startHackingAuto;
+        // Timeline Script (30 Seconds total)
+        const scriptEvents = [
+            { time: 1, percent: 5, stage: "RECON", text: "[*] Session initialized by operator: <b style='color:#fff;'>Ronny_the_pirate</b>" },
+            { time: 2, percent: 10, stage: "RECON", text: "[*] Establishing encrypted WireGuard proxy node..." },
+            { time: 3, percent: 15, stage: "RECON", text: "[+] Proxy established via remote server [185.220.101.4]" },
+            { time: 5, percent: 22, stage: "SCAN", text: "[*] Launching Nmap target enumeration on interface 192.168.1.104..." },
+            { time: 7, percent: 30, stage: "SCAN", text: "[+] Open ports found: 8080 (HTTP), 5555 (ADB), 8443 (HTTPS)" },
+            { time: 9, percent: 38, stage: "EXPLOIT", text: "[*] Querying local Android Debug Bridge daemon..." },
+            { time: 11, percent: 45, stage: "EXPLOIT", text: "<span class='warn'>[!] Crafting custom APK payload via Metasploit framework...</span>" },
+            { time: 14, percent: 52, stage: "EXPLOIT", text: "[*] Deploying stage-1 buffer overflow payload to target device..." },
+            { time: 16, percent: 60, stage: "INJECT", text: "[+] Payload delivered into process memory space [PID: 4102]." },
+            { time: 18, percent: 68, stage: "INJECT", text: "[*] Spawning Frida gadget hooking framework..." },
+            { time: 20, percent: 75, stage: "ELEVATE", text: "<span class='warn'>[!] Bypassing SELinux enforcements & Android Knox sandboxing...</span>" },
+            { time: 23, percent: 85, stage: "ELEVATE", text: "<span class='danger'>[!] Privilege escalation successful: UID=0 (root) acquired!</span>" },
+            { time: 25, percent: 92, stage: "EXTRACT", text: "[*] Extracting SQLite databases, media cache, and active system tokens..." },
+            { time: 28, percent: 98, stage: "EXTRACT", text: "[*] Establishing persistent reverse TCP shell..." },
+            { time: 30, percent: 100, stage: "COMPLETE", text: "<span class='success'>[=== SUCCESS ===] PHONE INFILTRATED & LINKED TO Ronny_the_pirate INTERFACE!</span>" }
+        ];
+
+        const terminal = document.getElementById('terminal');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const stageText = document.getElementById('stageText');
+        const statusBadge = document.getElementById('statusBadge');
+        const timerText = document.getElementById('timerText');
+
+        let secondsElapsed = 0;
+
+        // Timer counter
+        const timerInterval = setInterval(() => {
+            secondsElapsed++;
+            const secStr = secondsElapsed < 10 ? '0' + secondsElapsed : secondsElapsed;
+            timerText.innerText = `00:${secStr} / 00:30`;
+
+            if (secondsElapsed >= 30) {
+                clearInterval(timerInterval);
+                statusBadge.innerText = "ACCESS GRANTED";
+                statusBadge.style.background = "#00ff66";
+                statusBadge.style.color = "#000";
+            }
+        }, 1000);
+
+        // Process Timeline Events
+        scriptEvents.forEach(evt => {
+            setTimeout(() => {
+                // Print text line
+                const div = document.createElement('div');
+                div.innerHTML = evt.text;
+                terminal.appendChild(div);
+                terminal.scrollTop = terminal.scrollHeight;
+
+                // Play sound
+                playBeep(600 + (evt.percent * 8), 0.04);
+
+                // Update UI elements
+                progressBar.style.width = evt.percent + '%';
+                progressPercent.innerText = evt.percent + '%';
+                stageText.innerText = evt.stage;
+                statusBadge.innerText = `EXECUTING: ${evt.stage}`;
+
+            }, evt.time * 1000);
+        });
     </script>
 </body>
 </html>
