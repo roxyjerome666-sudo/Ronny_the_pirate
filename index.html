@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RONNY_THE_PIRATE // TERMINAL_ACCESS</title>
+    <title>RONNY_THE_PIRATE // LIVE_BREACH_STREAM</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
@@ -15,7 +15,7 @@
         }
 
         body {
-            background-color: #030a03;
+            background-color: #020802;
             color: #00ff41;
             min-height: 100vh;
             display: flex;
@@ -27,13 +27,13 @@
             text-shadow: 0 0 5px #00ff41;
         }
 
-        /* Scanline CRT Effect */
+        /* CRT Scanlines */
         body::before {
             content: " ";
             display: block;
             position: fixed;
             top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
             z-index: 100;
             background-size: 100% 3px, 6px 100%;
             pointer-events: none;
@@ -41,11 +41,11 @@
 
         .terminal {
             width: 100%;
-            max-width: 850px;
-            background: rgba(2, 12, 2, 0.95);
+            max-width: 900px;
+            background: rgba(1, 10, 1, 0.95);
             border: 1px solid #00ff41;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
-            border-radius: 5px;
+            box-shadow: 0 0 25px rgba(0, 255, 65, 0.25);
+            border-radius: 6px;
             padding: 20px;
             position: relative;
         }
@@ -60,7 +60,7 @@
         }
 
         .title {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
             letter-spacing: 2px;
         }
@@ -69,46 +69,22 @@
             font-size: 0.8rem;
             background: #00ff41;
             color: #000;
-            padding: 2px 6px;
+            padding: 3px 8px;
             font-weight: bold;
-        }
-
-        .login-box {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .btn-hack {
-            background: transparent;
-            color: #00ff41;
-            border: 1px solid #00ff41;
-            padding: 12px 30px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            letter-spacing: 2px;
-            margin-top: 20px;
-            transition: all 0.2s;
-            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
-        }
-
-        .btn-hack:hover {
-            background: #00ff41;
-            color: #000;
-            box-shadow: 0 0 25px #00ff41;
+            letter-spacing: 1px;
         }
 
         .console-output {
-            display: none;
-            height: 400px;
+            height: 480px;
             overflow-y: auto;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             line-height: 1.5;
             text-align: left;
             padding-right: 10px;
         }
 
         .console-output::-webkit-scrollbar {
-            width: 5px;
+            width: 6px;
         }
 
         .console-output::-webkit-scrollbar-thumb {
@@ -116,13 +92,18 @@
         }
 
         .line {
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             word-wrap: break-word;
         }
 
+        .line.info {
+            color: #00e1ff;
+            text-shadow: 0 0 5px #00e1ff;
+        }
+
         .line.warn {
-            color: #ffb700;
-            text-shadow: 0 0 5px #ffb700;
+            color: #ffcc00;
+            text-shadow: 0 0 5px #ffcc00;
         }
 
         .line.danger {
@@ -132,11 +113,10 @@
 
         .progress-bar {
             width: 100%;
-            background: #051a05;
+            background: #031403;
             border: 1px solid #00ff41;
-            height: 20px;
+            height: 18px;
             margin-top: 15px;
-            display: none;
             position: relative;
         }
 
@@ -144,8 +124,8 @@
             width: 0%;
             height: 100%;
             background: #00ff41;
-            box-shadow: 0 0 10px #00ff41;
-            transition: width 0.3s;
+            box-shadow: 0 0 12px #00ff41;
+            transition: width 0.2s linear;
         }
 
         .blinking-cursor {
@@ -169,60 +149,68 @@
     <div class="terminal">
         <div class="header">
             <div class="title">> OPERATOR: Ronny_the_pirate</div>
-            <div class="status" id="status-tag">STANDBY</div>
+            <div class="status" id="status-tag">INITIALIZING...</div>
         </div>
 
-        <!-- LOGIN / INITIAL SCREEN -->
-        <div class="login-box" id="login-screen">
-            <h1 style="margin-bottom: 10px;">SYSTEM_OVERRIDE_V4.9</h1>
-            <p style="opacity: 0.8;">Target Device: [Detected Mobile Device]</p>
-            <button class="btn-hack" onclick="startHacking()">[ INITIALIZE SESSION ]</button>
-        </div>
-
-        <!-- SIMULATION CONSOLE -->
         <div class="console-output" id="console"></div>
 
-        <div class="progress-bar" id="progress-container">
+        <div class="progress-bar">
             <div class="progress-fill" id="progress"></div>
         </div>
     </div>
 
     <script>
         const logs = [
-            { text: "[*] Establishing secure SSH tunnel via Tor proxy chain...", delay: 600 },
-            { text: "[*] Resolving Target IP & MAC address through ARP poisoning...", delay: 800 },
-            { text: "[+] Target Identified: Mobile Handset (ARM64 / Android-iOS Kernel)", delay: 700 },
-            { text: "[*] Launching Metasploit Framework v6.3...", delay: 900 },
-            { text: "[*] Running Stage 1: Scanning open sockets with Nmap...", delay: 1000 },
-            { text: "[!] PORT 8080/TCP OPEN - ADB Debugging / WebKit Interface Detected", type: "warn", delay: 800 },
-            { text: "[*] Executing zero-day exploit payload: Android_WebKit_RCE_2026...", delay: 1200 },
-            { text: "[+] EXPLOIT SUCCESSFUL: Remote Code Execution granted!", type: "warn", delay: 1000 },
-            { text: "[*] Injecting stealth Meterpreter payload into system process [com.android.systemui]...", delay: 1400 },
-            { text: "[*] Escalating privileges using SELinux policy bypass (Rootkit v2.1)...", delay: 1100 },
-            { text: "[+] ROOT ACCESS GRANTED (#)", type: "warn", delay: 900 },
-            { text: "[*] Bypassing Android KeyStore & iOS Secure Enclave using Frida hooks...", delay: 1300 },
-            { text: "[*] Exfiltrating WhatsApp & Telegram database keys (SQLCipher)...", delay: 1200 },
-            { text: "[*] Intercepting SMS gateway & 2FA tokens via ADB logcat stream...", delay: 1000 },
-            { text: "[*] Dumping Gallery DCIM & iCloud Cached thumbnails...", delay: 1100 },
-            { text: "[!] CRITICAL: Live Microphone & Front Camera Access Hijacked!", type: "danger", delay: 1500 },
-            { text: "[*] Installing persistent backdoor daemon: /system/bin/ronny_stealthd...", delay: 1000 },
-            { text: "[*] Cleaning system logs (wtmp/lastlog) and masking IP traces...", delay: 900 },
-            { text: "[==================================================]", delay: 500 },
-            { text: "[>>>] SESSION FULLY ESTABLISHED BY Ronny_the_pirate [<<<]", type: "danger", delay: 800 },
-            { text: "[!] Target Phone is now fully controlled. Waiting for operator commands...", type: "danger", delay: 500 }
+            { text: "[*] Booting Ronny_the_pirate Cyber-Suite v9.4...", type: "info", delay: 800 },
+            { text: "[*] Initializing encrypted Tor SOCKS5 multi-hop routing...", delay: 600 },
+            { text: "[*] Node 1: Zurich, CH | Node 2: Reykjavik, IS | Node 3: Tokyo, JP", delay: 700 },
+            { text: "[+] IP Address masked successfully -> [185.220.101.42]", type: "info", delay: 600 },
+            { text: "[*] Scanning local network segment for vulnerable target devices...", delay: 1000 },
+            { text: "[*] Broadcasting ICMP Echo packets across subnet /24...", delay: 800 },
+            { text: "[+] Target Handset Detected: ARM64 Architecture (Mobile Node)", type: "warn", delay: 900 },
+            { text: "[*] Querying MAC address vendor database [OUI Lookup: Apple/Qualcomm]...", delay: 700 },
+            { text: "[*] Launching Nmap Port Scanner [SYN Stealth Scan]...", delay: 1100 },
+            { text: "    -> Port 22/TCP  [SSH]......... CLOSED", delay: 400 },
+            { text: "    -> Port 80/TCP  [HTTP]........ OPEN", delay: 400 },
+            { text: "    -> Port 443/TCP [HTTPS]....... OPEN", delay: 400 },
+            { text: "    -> Port 5555/TCP [ADB Remote].. OPEN", type: "warn", delay: 600 },
+            { text: "[!] EXPLOIT VECTOR FOUND: Open ADB/WebKit Debug Bridge on port 5555!", type: "danger", delay: 1000 },
+            { text: "[*] Loading Metasploit Framework 2026 Zero-Day Module Repository...", delay: 900 },
+            { text: "[*] Executing Exploit Payload: exploit/multi/android/adb_remote_rce", delay: 1200 },
+            { text: "[*] Sending raw heap-spray buffer overflow sequence (0x7fff5fbff000)...", delay: 1000 },
+            { text: "[+] RCE PAYLOAD DELIVERED! Bypassing ASLR & DEP protection...", type: "warn", delay: 1100 },
+            { text: "[*] Spawning Meterpreter Stager Shell inside process target...", delay: 800 },
+            { text: "[*] Meterpreter session 1 opened (127.0.0.1:4444 -> target:5555)", type: "info", delay: 1000 },
+            { text: "[*] Analyzing kernel permissions... [Linux Kernel 5.15 / iOS Darwin XNU]", delay: 900 },
+            { text: "[*] Escalating privileges via CVE-2026-SELinux-Bypass (Local Root Exploit)...", delay: 1300 },
+            { text: "[+] ROOT ACCESS CONFIRMED! UID: 0 (root) GID: 0 (root)", type: "danger", delay: 1000 },
+            { text: "[*] Injecting stealth rootkit daemon into /system/xbin/ronny_stealthd...", delay: 1100 },
+            { text: "[*] Hooking System Cryptography Engine via Frida Dynamic Instrumentation...", delay: 1200 },
+            { text: "[*] Dumping SQLite databases from local application sandbox...", delay: 900 },
+            { text: "    [1/4] Extracting WhatsApp enc.db master key............ [SUCCESS]", type: "info", delay: 800 },
+            { text: "    [2/4] Extracting Telegram Session Key & Contacts....... [SUCCESS]", type: "info", delay: 800 },
+            { text: "    [3/4] Extracting Saved Browser Credentials & Cookies... [SUCCESS]", type: "info", delay: 800 },
+            { text: "    [4/4] Intercepting SMS 2FA Gateway Stream.............. [ACTIVE]", type: "warn", delay: 800 },
+            { text: "[*] Bypassing Device KeyStore / Secure Enclave hardware vault...", delay: 1300 },
+            { text: "[!] HIJACKING SENSORS: Activating Microphone & Camera Feed in background...", type: "danger", delay: 1500 },
+            { text: "[*] Exfiltrating DCIM Photo Gallery and Cloud Sync Cache...", delay: 1100 },
+            { text: "    -> 1,420 Media files queued for silent background exfiltration...", delay: 900 },
+            { text: "[*] Establishing persistent Reverse TCP Shell on boot event...", delay: 1000 },
+            { text: "[*] Clearing system event logs (auditd / logcat / syslog)...", delay: 900 },
+            { text: "[*] Masking process name as [kworker/u16:2-events_unbound]...", delay: 800 },
+            { text: "[========================================================]", delay: 600 },
+            { text: "[>>>] FULL SYSTEM CONTROL ESTABLISHED BY Ronny_the_pirate [<<<]", type: "danger", delay: 1000 },
+            { text: "[!] Target Device completely compromised. Session locked in.", type: "danger", delay: 600 }
         ];
 
-        function startHacking() {
-            document.getElementById('login-screen').style.display = 'none';
+        function startHackingAuto() {
             const consoleBox = document.getElementById('console');
-            const progressContainer = document.getElementById('progress-container');
             const progressBar = document.getElementById('progress');
             const statusTag = document.getElementById('status-tag');
 
-            consoleBox.style.display = 'block';
-            progressContainer.style.display = 'block';
             statusTag.innerText = "HACKING IN PROGRESS...";
-            statusTag.style.background = "#ffb700";
+            statusTag.style.background = "#ffcc00";
+            statusTag.style.color = "#000";
 
             let currentStep = 0;
 
@@ -235,7 +223,7 @@
                     consoleBox.appendChild(p);
                     consoleBox.scrollTop = consoleBox.scrollHeight;
 
-                    // Update Progress Bar
+                    // Progress Bar
                     const percentage = Math.round(((currentStep + 1) / logs.length) * 100);
                     progressBar.style.width = percentage + '%';
 
@@ -246,9 +234,9 @@
                     statusTag.style.background = "#ff0055";
                     statusTag.style.color = "#fff";
 
-                    // Add blinking cursor at the end
                     const finalLine = document.createElement('div');
                     finalLine.className = 'line danger';
+                    finalLine.style.marginTop = "10px";
                     finalLine.innerHTML = 'Ronny_the_pirate@root:~# <span class="blinking-cursor"></span>';
                     consoleBox.appendChild(finalLine);
                     consoleBox.scrollTop = consoleBox.scrollHeight;
@@ -257,6 +245,9 @@
 
             printNextLine();
         }
+
+        // Start automatically as soon as page loads
+        window.onload = startHackingAuto;
     </script>
 </body>
 </html>
